@@ -1,3 +1,6 @@
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace Searchfy.API
 {
@@ -7,12 +10,12 @@ namespace Searchfy.API
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
-
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+
+            ConfigureServices(services: builder.Services);
 
             var app = builder.Build();
 
@@ -32,5 +35,10 @@ namespace Searchfy.API
 
             app.Run();
         }
+
+        private static void ConfigureServices(IServiceCollection services)
+        {
+        }
+
     }
 }
