@@ -1,6 +1,12 @@
+using Elastic.Clients.Elasticsearch;
+using Elastic.Transport;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Searchfy.Services.Contracts.Repositories;
+using Searchfy.Services.Repositories;
+using System;
 
 namespace Searchfy.API
 {
@@ -15,7 +21,7 @@ namespace Searchfy.API
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
-            ConfigureServices(services: builder.Services);
+            ConfigureServices(services: builder.Services , configuration: builder.Configuration);
 
             var app = builder.Build();
 
@@ -36,8 +42,32 @@ namespace Searchfy.API
             app.Run();
         }
 
-        private static void ConfigureServices(IServiceCollection services)
+        private static void ConfigureServices(IServiceCollection services , IConfiguration configuration)
         {
+            const string environmentVariable = "ASPNETCORE_ENVIRONMENT";
+
+            #region App Configurations
+            Configuration appConfiguration = new ();
+            configuration.Bind(appConfiguration);
+            services.AddSingleton(typeof(Configuration) , (_) => appConfiguration);
+            #endregion
+
+            #region Elasticsearch Configurations
+            var settings = new ElasticsearchClientSettings(new Uri(appConfiguration.Elasticsearch.BaseURL))
+                .CertificateFingerprint(appConfiguration.Elasticsearch.FingerPrint)
+                .Authentication(new BasicAuthentication(appConfiguration.Elasticsearch.UserName , appConfiguration.Elasticsearch.Password));
+
+            if (Environment.GetEnvironmentVariable(environmentVariable) == Environments.Development)
+            {
+                settings = settings.PrettyJson(true);
+            }
+
+            services.AddScoped(typeof(ElasticsearchClient) , (_) => new ElasticsearchClient(settings));
+            #endregion
+
+            #region Repositories
+            services.AddScoped<ITabRepository , TabRepository>();
+            #endregion
         }
 
     }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Searchfy.Domain.Enums;
+using System;
 using System.Collections.Generic;
 
 namespace Searchfy.Domain.Contracts
@@ -10,6 +11,7 @@ namespace Searchfy.Domain.Contracts
         IEnumerable<string> Keywords { get; set; }
         string Artist { get; set; }
         IEnumerable<INote> Notes { get; set; }
-
+        DateTime Year { get; set; }
+        Category Category { get; set; }
     }
 }
